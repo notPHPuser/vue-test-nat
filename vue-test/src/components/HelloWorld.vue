@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main">
     <input
       class="name_and_phone"
       type="text"
@@ -68,3 +68,11 @@ export default {
   },
 };
 </script>
+
+<style>
+.main {
+  width: 70%;
+  height: 500px;
+  margin: 0 auto;
+}
+</style>
