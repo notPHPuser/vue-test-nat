@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <div class="inputs">
+    <div v-show="showImput" class="inputs">
       <input
         class="name_and_phone"
         type="text"
@@ -14,20 +14,27 @@
         v-model="phoneNumber"
         placeholder="Номер телефона (через 8)"
       />
-      <button class="add_button" @click="saveData">Сохранить</button>
-      <button class="clear_button" @click="clearLocalStorage">Отчистить</button>
+      <select class="name_and_phone" v-model="selectedName">
+        <option v-for="(name, index) in savedNames" :key="index">
+          {{ name }}
+        </option>
+      </select>
+
+      <button class="button add" @click="saveData">Сохранить</button>
+      <button class="button clear" @click="clearLocalStorage">Отчистить</button>
     </div>
     <div class="all_info">
-      <ul class="list">
-        <li
-          class="list_item"
-          v-for="(savedData, index) in savedDataList"
-          :key="index"
-        >
-          <span class="span_li">{{ savedData.name }}</span>
-          <span class="span_li">{{ savedData.phoneNumber }}</span>
-        </li>
-      </ul>
+      <button @click="toggleInput">Показать</button>
+      <table>
+        <tr>
+          <th>Имя</th>
+          <th>Номер телефона</th>
+        </tr>
+        <tr v-for="(savedData, index) in savedDataList" :key="index">
+          <td>{{ savedData.name }}</td>
+          <td>{{ savedData.phoneNumber }}</td>
+        </tr>
+      </table>
     </div>
   </div>
 </template>
@@ -41,16 +48,26 @@ export default {
   },
   data() {
     return {
+      showImput: true,
       name: "",
       phoneNumber: "",
+      selectedName: "",
       savedDataList: [],
+      savedNames: JSON.parse(localStorage.getItem("savedNames")) || [],
     };
   },
+  created() {
+    console.log("Сохранные имена:", this.savedNames);
+  },
+
   mounted() {
-    this.savedDataList =
-      JSON.parse(localStorage.getItem("savedDataList")) || [];
+    this.loadSavedNames();
+    this.loadSavedData();
   },
   methods: {
+    toggleInput() {
+      this.showImput = !this.showImput;
+    },
     saveData() {
       if (this.name.trim() !== "" && this.phoneNumber.trim() !== "") {
         const savedData = {
@@ -62,6 +79,9 @@ export default {
           "savedDataList",
           JSON.stringify(this.savedDataList)
         );
+        const savedNames = [...this.savedNames, this.name];
+        localStorage.setItem("savedNames", JSON.stringify(savedNames));
+        console.log("Saved names:", savedNames);
         this.name = "";
         this.phoneNumber = "";
       }
@@ -69,6 +89,20 @@ export default {
     clearLocalStorage() {
       localStorage.clear();
       this.savedDataList = [];
+    },
+    loadSavedNames() {
+      const savedNames = localStorage.getItem("savedNames");
+      if (savedNames) {
+        this.savedNames = JSON.parse(savedNames);
+      } else {
+        this.savedNames = [];
+      }
+    },
+    loadSavedData() {
+      const savedDataList = localStorage.getItem("savedDataList");
+      if (savedDataList) {
+        this.savedDataList = JSON.parse(savedDataList);
+      }
     },
   },
 };
@@ -81,7 +115,7 @@ export default {
   /* border: 1px solid red; */
 }
 .list {
-  position: relative;
+  position: absolute;
   list-style-type: none;
   padding: 0;
 
@@ -90,24 +124,80 @@ export default {
   justify-content: space-between;
 }
 .all_info {
-  position: relative;
-  width: 20%;
+  position: absolute;
+  width: 30%;
   border: 1px solod red;
+  top: 100px;
+}
+
+.list_item {
+  height: 30px;
+}
+
+.button {
+  position: absolute;
+  width: 50%;
+  margin: 0 auto;
+  top: 30px;
+  height: 25px;
+}
+.add {
+  border: none;
+  background-color: rgb(109, 255, 109);
+  cursor: pointer;
+  border-radius: 10px;
 }
 .inputs {
-  position: relative;
-  width: 20%;
-  height: 100px;
-  justify-content: space-between;
-  left: 30%;
+  position: absolute;
+  width: 25%;
+  height: 220px;
+  justify-content: center;
+  left: 50%;
+  top: 10vh;
   display: flex;
   flex-direction: column;
+  /* border: 1px solid red; */
+  box-shadow: 0 0 10px 0 grey;
+  align-items: center;
+  text-align: center;
+  border-radius: 5px;
 }
-.list_item {
-  display: inline-block;
-  margin-right: 10px;
+/* .name_and_phone:nth-child(1) {
+  margin-bottom: 10px;
+} */
+.name_and_phone {
+  width: 60%;
+  height: 25px;
+  /* border-radius: 10px; */
+  border-bottom: 1px solid black;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin-bottom: 10px;
+  outline: none;
 }
-.span_li:nth-child(1) {
-  border-right: 1px solid black;
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+td {
+  border: 1px solid #ccc;
+
+  width: 60%;
+  height: 40px;
+  text-align: center;
+  vertical-align: top;
+  border-radius: 2px;
+  align-items: center;
+  font-size: 16px;
+}
+select {
+  text-orientation: vertical;
+  line-height: 100%;
+}
+.clear {
+  position: absolute;
+  top: 170px;
 }
 </style>
