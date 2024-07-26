@@ -10,7 +10,7 @@
       <input
         class="name_and_phone"
         type="tel"
-        v-mask="'#-###-###-##-##'"
+        v-mask="'8-###-###-##-##'"
         v-model="phoneNumber"
         placeholder="Номер телефона (через 8)"
       />
@@ -31,8 +31,13 @@
           <th>Номер телефона</th>
         </tr>
         <tr v-for="(savedData, index) in savedDataList" :key="index">
-          <td>{{ savedData.name }}</td>
-          <td>{{ savedData.phoneNumber }}</td>
+          <td :class="{ 'new-element': index !== savedDataList.length - 1 }">
+            {{ savedDataList[index].name }}
+            <span v-if="savedDataList[index].director">
+              (директор: {{ savedDataList[index].director }})
+            </span>
+          </td>
+          <td>{{ savedDataList[index].phoneNumber }}</td>
         </tr>
       </table>
     </div>
@@ -56,7 +61,19 @@ export default {
       savedNames: JSON.parse(localStorage.getItem("savedNames")) || [],
     };
   },
+  watch: {
+    selectedName(newValue) {
+      if (newValue !== "") {
+        this.showImput = true; // Show the new contact when an option is selected
+      } else {
+        this.showImput = false; // Hide the new contact when no option is selected
+      }
+    },
+  },
   created() {
+    this.savedDataList =
+      JSON.parse(localStorage.getItem("savedDataList")) || [];
+    this.savedNames = JSON.parse(localStorage.getItem("savedNames")) || [];
     console.log("Сохранные имена:", this.savedNames);
   },
 
@@ -73,22 +90,37 @@ export default {
         const savedData = {
           name: this.name,
           phoneNumber: this.phoneNumber,
+          director: this.selectedName,
         };
-        this.savedDataList.push(savedData);
-        localStorage.setItem(
-          "savedDataList",
-          JSON.stringify(this.savedDataList)
-        );
-        const savedNames = [...this.savedNames, this.name];
+        const selectedNameIndex = this.savedNames.indexOf(this.selectedName);
+        const newIndex =
+          selectedNameIndex !== -1
+            ? selectedNameIndex + 1
+            : this.savedDataList.length;
+        this.savedDataList.splice(newIndex, 0, savedData);
+        const savedNames = [...this.savedNames];
+        savedNames.splice(newIndex, 0, this.name);
         localStorage.setItem("savedNames", JSON.stringify(savedNames));
         console.log("Saved names:", savedNames);
         this.name = "";
         this.phoneNumber = "";
+        this.loadSavedNames(); // Load the saved names after saving a new contact
+
+        // Сохраняем данные в localStorage
+        localStorage.setItem(
+          "savedDataList",
+          JSON.stringify(this.savedDataList)
+        );
+        localStorage.setItem("savedNames", JSON.stringify(this.savedNames));
       }
     },
     clearLocalStorage() {
-      localStorage.clear();
       this.savedDataList = [];
+      this.savedNames = [];
+
+      // Очищаем данные из localStorage
+      localStorage.removeItem("savedDataList");
+      localStorage.removeItem("savedNames");
     },
     loadSavedNames() {
       const savedNames = localStorage.getItem("savedNames");
@@ -146,6 +178,8 @@ export default {
   background-color: rgb(109, 255, 109);
   cursor: pointer;
   border-radius: 10px;
+  top: 20px;
+  position: relative;
 }
 .inputs {
   position: absolute;
@@ -182,7 +216,7 @@ table {
 }
 
 td {
-  border: 1px solid #ccc;
+  border: 1px solid grey;
 
   width: 60%;
   height: 40px;
@@ -198,6 +232,13 @@ select {
 }
 .clear {
   position: absolute;
-  top: 170px;
+  top: -10px;
+}
+.savedData {
+  border: 2px solid red;
+  border-radius: 5px;
+}
+.new-element {
+  width: calc(100% - 10px);
 }
 </style>
