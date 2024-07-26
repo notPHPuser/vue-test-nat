@@ -21,10 +21,10 @@
       </select>
 
       <button class="button add" @click="saveData">Сохранить</button>
-      <button class="button clear" @click="clearLocalStorage">Отчистить</button>
+      <!-- <button class="button clear" @click="clearLocalStorage">Отчистить</button> -->
     </div>
     <div class="all_info">
-      <button @click="toggleInput">Показать</button>
+      <button class="show" @click="toggleInput">Добавить контакты</button>
       <table>
         <tr>
           <th>Имя</th>
@@ -53,7 +53,7 @@ export default {
   },
   data() {
     return {
-      showImput: true,
+      showImput: false,
       name: "",
       phoneNumber: "",
       selectedName: "",
@@ -64,9 +64,9 @@ export default {
   watch: {
     selectedName(newValue) {
       if (newValue !== "") {
-        this.showImput = true; // Show the new contact when an option is selected
+        this.showImput = true;
       } else {
-        this.showImput = false; // Hide the new contact when no option is selected
+        this.showImput = false;
       }
     },
   },
@@ -104,7 +104,8 @@ export default {
         console.log("Saved names:", savedNames);
         this.name = "";
         this.phoneNumber = "";
-        this.loadSavedNames(); // Load the saved names after saving a new contact
+        this.selectedName = "";
+        this.loadSavedNames();
 
         // Сохраняем данные в localStorage
         localStorage.setItem(
@@ -187,7 +188,7 @@ export default {
   height: 220px;
   justify-content: center;
   left: 50%;
-  top: 10vh;
+  top: 16.5vh;
   display: flex;
   flex-direction: column;
   /* border: 1px solid red; */
@@ -240,5 +241,13 @@ select {
 }
 .new-element {
   width: calc(100% - 10px);
+}
+.show {
+  width: 30%;
+  height: 30px;
+  border-radius: 5px;
+  border: none;
+  background-color: chartreuse;
+  cursor: pointer;
 }
 </style>
